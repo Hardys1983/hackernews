@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "Application Test";
+}
+
+<h2>Top News Stories</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <td>Index</td>
+            <td>Author</td>
+            <td>Title</td>
+            <td>Url</td>
+        </tr>
+    </thead>
+    <tbody id="TopNewsBodyId"></tbody>
+</table>
+
+<script src="~/Scripts/jquery-3.2.1.min.js"></script>
+<script src="~/Scripts/jquery.signalR-2.2.2.js"></script>
+<script src="~/signalr/hubs"></script>
+<script src="~/Scripts/HackerNews.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        const handler = new HackerNews("@ViewBag.Guid");
+    });
+</script>
