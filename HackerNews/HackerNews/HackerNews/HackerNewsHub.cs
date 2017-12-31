@@ -14,7 +14,7 @@ namespace HackerNews.HackerNews
         private static NewsProcessor _newsProcessor = new NewsProcessor();
         private static ConcurrentDictionary<int, HackerNewsModel> _news = new ConcurrentDictionary<int, HackerNewsModel>();
         private static ConcurrentDictionary<string, string> _clientSearches = new ConcurrentDictionary<string, string>();
-        private static ConcurrentQueue<int> _ids = new ConcurrentQueue<int>();
+        private static ConcurrentQueue<int> _idsOrder = new ConcurrentQueue<int>();
 
         public HackerNewsHub()
         {
@@ -46,12 +46,12 @@ namespace HackerNews.HackerNews
                     }
                 }
 
-                var areSequencesDifferent = !_ids.SequenceEqual(ids);
-                if (changed || areSequencesDifferent)
+                var positionsChanged = !_idsOrder.SequenceEqual(ids);
+                if (changed || positionsChanged)
                 {
-                    if (areSequencesDifferent)
+                    if (positionsChanged)
                     {
-                        _ids = new ConcurrentQueue<int>(ids);
+                        _idsOrder = new ConcurrentQueue<int>(ids);
                     }
 
                     RetrieveData();
@@ -64,7 +64,7 @@ namespace HackerNews.HackerNews
         public void FilterBy(string filter)
         {
             _clientSearches[GetClientIdentifier(Context)] = filter;
-            FilterResultForClient(_ids.Select(value => _news[value]), GetClientIdentifier(Context), filter);
+            FilterResultForClient(_news.Values, GetClientIdentifier(Context), filter);
         }
 
         public static bool StringContains(string data, string needle)
@@ -74,14 +74,21 @@ namespace HackerNews.HackerNews
 
         private void FilterResultForClient(IEnumerable<HackerNewsModel> items, string connectionId, string filter)
         {
-            var result = items.Where(item => string.IsNullOrEmpty(filter) || StringContains(item.Title, filter) || StringContains(item.By, filter));
+            var result = items
+                    .Where(item => string.IsNullOrEmpty(filter) || StringContains(item.Title, filter) || StringContains(item.By, filter))
+                    .OrderByDescending(item => item.Score);
+
             Clients.Clients(new[] { connectionId }).updateTopHackerNews(JsonConvert.SerializeObject(result));
         }
 
         public void RetrieveData()
         {
-            var items = _ids.Select(value => _news[value]);
-            var withFilters = _clientSearches.Where(pair => !string.IsNullOrEmpty(pair.Value)).Select(x => x.Key).ToArray();
+            var items = _news.Values.OrderByDescending(item => item.Score);
+
+            var withFilters = _clientSearches
+                                    .Where(pair => !string.IsNullOrEmpty(pair.Value))
+                                    .Select(x => x.Key).ToArray();
+
             Clients.AllExcept(withFilters).updateTopHackerNews(JsonConvert.SerializeObject(items));
 
             foreach (var searchConnection in _clientSearches.Where(pair => !string.IsNullOrEmpty(pair.Value)))
