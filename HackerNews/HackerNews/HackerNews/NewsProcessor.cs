@@ -24,7 +24,7 @@ namespace HackerNews.HackerNews
             throw new Exception("Could not retrieve the ids");
         }
 
-        public string GetItem(int id)
+        public HackerNewsModel GetItem(int id)
         {
             var request = new RestRequest($"{id}.json", Method.GET);
             request.AddUrlSegment("print", "pretty");
@@ -32,7 +32,7 @@ namespace HackerNews.HackerNews
             var response = _itemClient.Execute(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                return response.Content;
+                return HackerNewsModel.FromJson(response.Content);
             }
 
             throw new Exception($"Could not retrieve the item #{id}");

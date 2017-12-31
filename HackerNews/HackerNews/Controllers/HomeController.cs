@@ -8,7 +8,6 @@ namespace HackerNews.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            ViewBag.Guid = Guid.NewGuid().ToString();
             return View();
         }
     }

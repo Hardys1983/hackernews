@@ -161,6 +161,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="HackerNews\HackerNewsHub.cs" />
+    <Compile Include="HackerNews\HackerNewsModel.cs" />
     <Compile Include="HackerNews\NewsProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
