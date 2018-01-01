@@ -31,7 +31,7 @@
                     <td>${i + 1}</td>
                     <td>${rows[i].by}</td>
                     <td>${rows[i].title}</td>
-                    <td><a href="${rows[i].url}">History</a></td>
+                    <td><a href="${rows[i].url}" target="_blank">History</a></td>
                 </tr>`;
 
             this.$tableContent.append(htmlRow);

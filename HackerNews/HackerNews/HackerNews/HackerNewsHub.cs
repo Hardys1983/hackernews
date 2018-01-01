@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +17,22 @@ namespace HackerNews.HackerNews
         private static ConcurrentDictionary<string, string> _clientSearches = new ConcurrentDictionary<string, string>();
         private static ConcurrentQueue<int> _idsOrder = new ConcurrentQueue<int>();
 
+        private static object _threadMutex = new Object();
+        private static Thread _thread; 
+
         public HackerNewsHub()
         {
-            var thread = new Thread(UpdateData);
-            thread.Start();
+            if (_thread == null)
+            {
+                lock (_threadMutex)
+                {
+                    if (_thread == null)
+                    {
+                        _thread = new Thread(UpdateData);
+                        _thread.Start();
+                    }
+                }
+            }
         }
 
         private void UpdateData(object state)
